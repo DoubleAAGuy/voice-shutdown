@@ -5,13 +5,13 @@
 .DESCRIPTION
     Uses the built-in offline Windows Speech Recognizer (System.Speech / SAPI).
     No internet, no external dependencies, no model downloads. Listens continuously
-    for a spoken keyword (default: "shutdown"). When heard with enough confidence it
+    for a spoken keyword (default: "agrivated"). When heard with enough confidence it
     starts a short cancellable countdown, then shuts the PC down.
 
     Say the cancel word (default: "cancel") during the countdown to abort.
 
 .PARAMETER Keyword
-    The word or phrase that triggers shutdown. Default: "shutdown".
+    The word or phrase that triggers shutdown. Default: "agrivated".
     A two-word phrase (e.g. "computer shutdown") is recommended to avoid false triggers.
 
 .PARAMETER CancelWord
@@ -33,7 +33,7 @@
 
 .EXAMPLE
     .\voice-shutdown.ps1
-    Listens for "shutdown".
+    Listens for "agrivated".
 
 .EXAMPLE
     .\voice-shutdown.ps1 -Keyword "computer shutdown" -Test
@@ -42,7 +42,7 @@
 
 [CmdletBinding()]
 param(
-    [string]$Keyword = "shutdown",
+    [string]$Keyword = "agrivated",
     [string]$CancelWord = "cancel",
     [ValidateRange(0.0, 1.0)]
     [double]$Confidence = 0.85,

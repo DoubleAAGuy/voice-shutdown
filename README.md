@@ -3,7 +3,7 @@
 Say a word, and your Windows PC turns off.
 
 **Voice Shutdown** is a tiny, always-on listener for Windows. It waits silently in the
-background until it hears your chosen keyword (default: **"shutdown"**), then runs a short
+background until it hears your chosen keyword (default: **"agrivated"**), then runs a short
 cancellable countdown and powers off your computer.
 
 It uses the **built-in offline Windows Speech Recognizer** — so there's:
@@ -24,7 +24,7 @@ It uses the **built-in offline Windows Speech Recognizer** — so there's:
    powershell -ExecutionPolicy Bypass -File .\voice-shutdown.ps1
    ```
 
-3. Say **"shutdown"**. You'll get a 5-second countdown (with beeps). Say **"cancel"** to abort.
+3. Say **"agrivated"**. You'll get a 5-second countdown (with beeps). Say **"cancel"** to abort.
 
 > 💡 **Try it safely first** with `-Test`, which does everything *except* actually shut down:
 > ```powershell
@@ -60,7 +60,7 @@ Pass these to `voice-shutdown.ps1` (and `install-startup.ps1` supports `-Keyword
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `-Keyword` | `"shutdown"` | Word/phrase that triggers shutdown. |
+| `-Keyword` | `"agrivated"` | Word/phrase that triggers shutdown. |
 | `-CancelWord` | `"cancel"` | Word that aborts the countdown. |
 | `-Confidence` | `0.85` | Minimum recognition confidence (0.0–1.0). Higher = fewer false triggers. |
 | `-CountdownSeconds` | `5` | Cancellable delay before shutdown. |

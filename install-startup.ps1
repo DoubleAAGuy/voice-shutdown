@@ -5,13 +5,13 @@
     Creates a Scheduled Task (per-user) that runs voice-shutdown.ps1 hidden at logon.
     Re-run to update. Use uninstall-startup.ps1 to remove.
 .PARAMETER Keyword
-    Keyword to listen for. Default: "shutdown".
+    Keyword to listen for. Default: "agrivated".
 .PARAMETER Confidence
     Minimum confidence 0.0-1.0. Default: 0.85.
 #>
 [CmdletBinding()]
 param(
-    [string]$Keyword = "shutdown",
+    [string]$Keyword = "agrivated",
     [double]$Confidence = 0.85
 )
 
