@@ -6,26 +6,18 @@
     Uses the built-in offline Windows Speech Recognizer (System.Speech / SAPI).
     No internet, no external dependencies, no model downloads. Listens continuously
     for a spoken keyword (default: "agrivated"). When heard with enough confidence it
-    starts a short cancellable countdown, then shuts the PC down.
-
-    Say the cancel word (default: "cancel") during the countdown to abort.
+    shuts the PC down immediately.
 
 .PARAMETER Keyword
     The word or phrase that triggers shutdown. Default: "agrivated".
-    A two-word phrase (e.g. "computer shutdown") is recommended to avoid false triggers.
-
-.PARAMETER CancelWord
-    The word that aborts the countdown. Default: "cancel".
+    A two-word phrase (e.g. "computer agrivated") is recommended to avoid false triggers.
 
 .PARAMETER Confidence
     Minimum recognition confidence (0.0 - 1.0) required to accept the keyword.
     Higher = fewer false positives but you may need to speak more clearly. Default: 0.85.
 
-.PARAMETER CountdownSeconds
-    Seconds to wait (cancellable) before shutting down. Default: 5.
-
 .PARAMETER Test
-    Dry run. Detects the keyword and runs the countdown but does NOT shut down.
+    Dry run. Detects the keyword but does NOT shut down.
     Use this to confirm your mic and keyword work safely.
 
 .PARAMETER Force
@@ -33,21 +25,18 @@
 
 .EXAMPLE
     .\voice-shutdown.ps1
-    Listens for "agrivated".
+    Listens for "agrivated" and shuts down immediately when heard.
 
 .EXAMPLE
-    .\voice-shutdown.ps1 -Keyword "computer shutdown" -Test
+    .\voice-shutdown.ps1 -Keyword "computer agrivated" -Test
     Safe test run with a two-word phrase; never actually shuts down.
 #>
 
 [CmdletBinding()]
 param(
     [string]$Keyword = "agrivated",
-    [string]$CancelWord = "cancel",
     [ValidateRange(0.0, 1.0)]
     [double]$Confidence = 0.85,
-    [ValidateRange(0, 3600)]
-    [int]$CountdownSeconds = 5,
     [switch]$Test,
     [switch]$Force
 )
@@ -78,14 +67,13 @@ if (-not $recognizers -or $recognizers.Count -eq 0) {
     exit 1
 }
 
-Write-Log "Starting voice-shutdown. Keyword='$Keyword' Cancel='$CancelWord' Confidence=$Confidence Countdown=${CountdownSeconds}s Test=$($Test.IsPresent)"
+Write-Log "Starting voice-shutdown. Keyword='$Keyword' Confidence=$Confidence Test=$($Test.IsPresent)"
 
 $engine = New-Object System.Speech.Recognition.SpeechRecognitionEngine
 
-# ---- Build a constrained grammar (keyword + cancel word) -----------------
+# ---- Build a constrained grammar (just the keyword) ----------------------
 $choices = New-Object System.Speech.Recognition.Choices
 $choices.Add($Keyword)
-$choices.Add($CancelWord)
 $gb = New-Object System.Speech.Recognition.GrammarBuilder
 $gb.Append($choices)
 $grammar = New-Object System.Speech.Recognition.Grammar $gb
@@ -99,29 +87,7 @@ try {
     exit 1
 }
 
-# ---- Shared state --------------------------------------------------------
-$script:CancelRequested = $false
-
 function Invoke-Shutdown {
-    Write-Log "Keyword confirmed. Beginning ${CountdownSeconds}s countdown. Say '$CancelWord' to abort." "WARN"
-    $script:CancelRequested = $false
-
-    for ($i = $CountdownSeconds; $i -gt 0; $i--) {
-        if ($script:CancelRequested) {
-            Write-Log "Shutdown ABORTED by voice command." "WARN"
-            [System.Console]::Beep(400, 300)
-            return
-        }
-        Write-Log "Shutting down in $i..." "WARN"
-        [System.Console]::Beep(900, 150)
-        Start-Sleep -Seconds 1
-    }
-
-    if ($script:CancelRequested) {
-        Write-Log "Shutdown ABORTED by voice command." "WARN"
-        return
-    }
-
     if ($Test) {
         Write-Log "TEST MODE: shutdown skipped. (Real run would power off now.)" "WARN"
         [System.Console]::Beep(1200, 400)
@@ -140,15 +106,9 @@ $onRecognized = {
     $text = $e.Result.Text
     $conf = [math]::Round($e.Result.Confidence, 3)
 
-    if ($text -ieq $CancelWord) {
-        Write-Log "Heard cancel word '$text' (confidence $conf)."
-        $script:CancelRequested = $true
-        return
-    }
-
     if ($text -ieq $Keyword) {
         if ($e.Result.Confidence -ge $Confidence) {
-            Write-Log "Keyword '$text' recognized (confidence $conf >= $Confidence)."
+            Write-Log "Keyword '$text' recognized (confidence $conf >= $Confidence). Shutting down."
             Invoke-Shutdown
         } else {
             Write-Log "Keyword '$text' heard but confidence $conf < $Confidence. Ignored."

@@ -3,8 +3,8 @@
 Say a word, and your Windows PC turns off.
 
 **Voice Shutdown** is a tiny, always-on listener for Windows. It waits silently in the
-background until it hears your chosen keyword (default: **"agrivated"**), then runs a short
-cancellable countdown and powers off your computer.
+background until it hears your chosen keyword (default: **"agrivated"**), then immediately
+powers off your computer.
 
 It uses the **built-in offline Windows Speech Recognizer** — so there's:
 
@@ -24,9 +24,10 @@ It uses the **built-in offline Windows Speech Recognizer** — so there's:
    powershell -ExecutionPolicy Bypass -File .\voice-shutdown.ps1
    ```
 
-3. Say **"agrivated"**. You'll get a 5-second countdown (with beeps). Say **"cancel"** to abort.
+3. Say **"agrivated"**. Your PC shuts down immediately.
 
-> 💡 **Try it safely first** with `-Test`, which does everything *except* actually shut down:
+> ⚠️ **There is no countdown or cancel** — the moment the keyword is recognized, the shutdown fires.
+> **Try it safely first** with `-Test`, which does everything *except* actually shut down:
 > ```powershell
 > powershell -ExecutionPolicy Bypass -File .\voice-shutdown.ps1 -Test
 > ```
@@ -61,30 +62,27 @@ Pass these to `voice-shutdown.ps1` (and `install-startup.ps1` supports `-Keyword
 | Option | Default | Description |
 | --- | --- | --- |
 | `-Keyword` | `"agrivated"` | Word/phrase that triggers shutdown. |
-| `-CancelWord` | `"cancel"` | Word that aborts the countdown. |
 | `-Confidence` | `0.85` | Minimum recognition confidence (0.0–1.0). Higher = fewer false triggers. |
-| `-CountdownSeconds` | `5` | Cancellable delay before shutdown. |
 | `-Test` | off | Dry run — never actually shuts down. |
 | `-Force` | off | Force apps to close (`shutdown /f`). |
 
 **Examples**
 
 ```powershell
-# Use a safer two-word phrase so a random "shutdown" in conversation won't trigger it
-.\voice-shutdown.ps1 -Keyword "computer shutdown"
+# Use a safer two-word phrase so a random word in conversation won't trigger it
+.\voice-shutdown.ps1 -Keyword "computer agrivated"
 
-# Longer countdown, stricter confidence
-.\voice-shutdown.ps1 -CountdownSeconds 10 -Confidence 0.9
+# Stricter confidence
+.\voice-shutdown.ps1 -Confidence 0.9
 ```
 
 ---
 
 ## Tips to avoid accidental shutdowns
 
-- Use a **two-word phrase** like `"computer shutdown"` or `"goodnight computer"`.
+- Use a **two-word phrase** like `"computer agrivated"` or `"goodnight computer"`.
 - Keep **`-Confidence`** at `0.85` or higher.
-- Remember the **`-Test`** flag while you dial in the settings.
-- The **countdown + "cancel"** word is your safety net — you always get a few seconds to abort.
+- Remember the **`-Test`** flag while you dial in the settings — shutdown is instant with no cancel.
 
 ---
 
@@ -101,10 +99,9 @@ Pass these to `voice-shutdown.ps1` (and `install-startup.ps1` supports `-Keyword
 ## How it works
 
 The script loads .NET's `System.Speech.Recognition.SpeechRecognitionEngine`, builds a small
-**constrained grammar** containing only your keyword and the cancel word, points it at your
-default microphone, and listens continuously. When the keyword is recognized above the
-confidence threshold, it beeps through a countdown (watching for the cancel word) and then
-calls `shutdown /s /t 0`.
+**constrained grammar** containing only your keyword, points it at your default microphone,
+and listens continuously. When the keyword is recognized above the confidence threshold, it
+immediately calls `shutdown /s /t 0`.
 
 All activity is written to `voice-shutdown.log` next to the script.
 
