@@ -18,15 +18,22 @@ param(
 $ErrorActionPreference = "Stop"
 $TaskName = "VoiceShutdownListener"
 $ScriptPath = Join-Path $PSScriptRoot "voice-shutdown.ps1"
+$VbsPath = Join-Path $PSScriptRoot "run-hidden.vbs"
 
 if (-not (Test-Path $ScriptPath)) {
     Write-Error "Cannot find voice-shutdown.ps1 next to this installer."
     exit 1
 }
+if (-not (Test-Path $VbsPath)) {
+    Write-Error "Cannot find run-hidden.vbs next to this installer."
+    exit 1
+}
 
-$psArgs = "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$ScriptPath`" -Keyword `"$Keyword`" -Confidence $Confidence"
+# Launch through wscript + the .vbs so NO console window (not even a flash)
+# appears at logon. wscript starts the PowerShell process fully hidden.
+$wsArgs = "`"$VbsPath`" `"$Keyword`" $Confidence"
 
-$action    = New-ScheduledTaskAction -Execute "powershell.exe" -Argument $psArgs
+$action    = New-ScheduledTaskAction -Execute "wscript.exe" -Argument $wsArgs
 $trigger   = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
 $settings  = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -ExecutionTimeLimit ([TimeSpan]::Zero)
 $principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Limited

@@ -46,8 +46,9 @@ Run once:
 powershell -ExecutionPolicy Bypass -File .\install-startup.ps1
 ```
 
-This registers a per-user Scheduled Task that launches the listener silently whenever you
-log in. To stop it from auto-starting:
+This registers a per-user Scheduled Task that launches the listener whenever you log in.
+It runs through `wscript` + `run-hidden.vbs`, so **no console window ever appears** — not
+even a brief flash at boot. To stop it from auto-starting:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\uninstall-startup.ps1
