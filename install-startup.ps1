@@ -7,7 +7,7 @@
     Task (per-user) that runs voice-shutdown.ps1 hidden at logon. Re-run to update.
     Use uninstall-startup.ps1 to remove.
 .PARAMETER Keyword
-    Keyword to listen for. Default: "cool".
+    Keyword to listen for. Default: "very amazing".
 .PARAMETER Confidence
     Minimum confidence 0.0-1.0. Default: 0.85.
 .PARAMETER NoStart
@@ -15,7 +15,7 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$Keyword = "cool",
+    [string]$Keyword = "very amazing",
     [ValidateRange(0.0, 1.0)]
     [double]$Confidence = 0.85,
     [switch]$NoStart

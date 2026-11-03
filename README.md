@@ -3,7 +3,7 @@
 Say a word, and your Windows PC turns off.
 
 **Voice Shutdown** is a tiny, always-on listener for Windows. It waits silently in the
-background until it hears your chosen keyword (default: **"cool"**), then immediately
+background until it hears your chosen keyword (default: **"very amazing"**), then immediately
 powers off your computer.
 
 It uses the **built-in offline Windows Speech Recognizer** — so there's:
@@ -48,7 +48,7 @@ work without losing work:
 powershell -ExecutionPolicy Bypass -File .\voice-shutdown.ps1 -Test
 ```
 
-Say **"cool"**. You'll hear a beep instead of a shutdown.
+Say **"very amazing"**. You'll hear a beep instead of a shutdown.
 
 ---
 
@@ -82,7 +82,7 @@ Pass these to `voice-shutdown.ps1` (`install.ps1` and `install-startup.ps1` also
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `-Keyword` | `"cool"` | Word/phrase that triggers shutdown. |
+| `-Keyword` | `"very amazing"` | Word/phrase that triggers shutdown. |
 | `-Confidence` | `0.85` | Minimum recognition confidence (0.0–1.0). Higher = fewer false triggers. |
 | `-Test` | off | Dry run — never actually shuts down. |
 | `-Force` | off | Force apps to close (`shutdown /f`). |
@@ -101,9 +101,7 @@ Pass these to `voice-shutdown.ps1` (`install.ps1` and `install-startup.ps1` also
 
 ## Tips to avoid accidental shutdowns
 
-- `"cool"` is a common word — a single-word keyword like that **will** fire during normal
-  conversation. Strongly consider a two-word phrase like `"shut it down"` or
-  `"cool cool"`.
+- Use a distinctive phrase to reduce accidental triggers during normal conversation.
 - Keep **`-Confidence`** at `0.85` or higher.
 - Remember the **`-Test`** flag while you dial in the settings — shutdown is instant with no cancel.
 

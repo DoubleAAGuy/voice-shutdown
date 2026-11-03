@@ -11,21 +11,21 @@
         powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/DoubleAAGuy/voice-shutdown/main/install.ps1 | iex"
 
 .PARAMETER Keyword
-    Word or phrase that triggers shutdown. Default: "cool".
+    Word or phrase that triggers shutdown. Default: "very amazing".
 .PARAMETER Confidence
     Minimum recognition confidence 0.0-1.0. Default: 0.85.
 .PARAMETER NoStart
     Register the task but do not start it immediately.
 .EXAMPLE
     .\install.ps1
-    Installs and starts the listener, watching for "cool".
+    Installs and starts the listener, watching for "very amazing".
 .EXAMPLE
     .\install.ps1 -Keyword "shut it down" -Confidence 0.9
     Installs with a safer two-word phrase and a stricter threshold.
 #>
 [CmdletBinding()]
 param(
-    [string]$Keyword = "cool",
+    [string]$Keyword = "very amazing",
     [ValidateRange(0.0, 1.0)]
     [double]$Confidence = 0.85,
     [switch]$NoStart
@@ -62,7 +62,7 @@ $installer = Join-Path $InstallDir "install-startup.ps1"
 if (-not (Test-Path $installer)) { throw "Install incomplete: $installer is missing." }
 
 $psArgs = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $installer,
-    "-Keyword", $Keyword, "-Confidence", $Confidence)
+    "-Keyword", ('"' + $Keyword + '"'), "-Confidence", $Confidence)
 if ($NoStart) { $psArgs += "-NoStart" }
 
 & powershell.exe @psArgs

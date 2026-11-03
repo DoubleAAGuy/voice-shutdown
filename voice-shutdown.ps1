@@ -5,12 +5,12 @@
 .DESCRIPTION
     Uses the built-in offline Windows Speech Recognizer (System.Speech / SAPI).
     No internet, no external dependencies, no model downloads. Listens continuously
-    for a spoken keyword (default: "cool"). When heard with enough confidence it
+    for a spoken keyword (default: "very amazing"). When heard with enough confidence it
     shuts the PC down immediately.
 
 .PARAMETER Keyword
-    The word or phrase that triggers shutdown. Default: "cool".
-    A two-word phrase (e.g. "cool cool") is recommended to avoid false triggers.
+    The word or phrase that triggers shutdown. Default: "very amazing".
+    A distinctive phrase is recommended to avoid false triggers.
 
 .PARAMETER Confidence
     Minimum recognition confidence (0.0 - 1.0) required to accept the keyword.
@@ -25,7 +25,7 @@
 
 .EXAMPLE
     .\voice-shutdown.ps1
-    Listens for "cool" and shuts down immediately when heard.
+    Listens for "very amazing" and shuts down immediately when heard.
 
 .EXAMPLE
     .\voice-shutdown.ps1 -Keyword "shut it down" -Test
@@ -34,7 +34,7 @@
 
 [CmdletBinding()]
 param(
-    [string]$Keyword = "cool",
+    [string]$Keyword = "very amazing",
     [ValidateRange(0.0, 1.0)]
     [double]$Confidence = 0.85,
     [switch]$Test,
