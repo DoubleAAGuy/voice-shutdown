@@ -1,33 +1,50 @@
 <#
 .SYNOPSIS
-    Registers voice-shutdown to start automatically and silently every time you log in.
+    Installs Voice Shutdown into %LOCALAPPDATA%\VoiceShutdown and registers it to
+    start automatically, silently, at every logon.
 .DESCRIPTION
-    Creates a Scheduled Task (per-user) that runs voice-shutdown.ps1 hidden at logon.
-    Re-run to update. Use uninstall-startup.ps1 to remove.
+    Copies the needed files to a stable per-user folder, then creates a Scheduled
+    Task (per-user) that runs voice-shutdown.ps1 hidden at logon. Re-run to update.
+    Use uninstall-startup.ps1 to remove.
 .PARAMETER Keyword
-    Keyword to listen for. Default: "agrivated".
+    Keyword to listen for. Default: "cool".
 .PARAMETER Confidence
     Minimum confidence 0.0-1.0. Default: 0.85.
+.PARAMETER NoStart
+    Register the task but do not start it immediately.
 #>
 [CmdletBinding()]
 param(
-    [string]$Keyword = "agrivated",
-    [double]$Confidence = 0.85
+    [string]$Keyword = "cool",
+    [ValidateRange(0.0, 1.0)]
+    [double]$Confidence = 0.85,
+    [switch]$NoStart
 )
 
 $ErrorActionPreference = "Stop"
 $TaskName = "VoiceShutdownListener"
-$ScriptPath = Join-Path $PSScriptRoot "voice-shutdown.ps1"
-$VbsPath = Join-Path $PSScriptRoot "run-hidden.vbs"
+$InstallDir = Join-Path $env:LOCALAPPDATA "VoiceShutdown"
+$Here = $PSScriptRoot
+$Required = @("voice-shutdown.ps1", "run-hidden.vbs")
 
-if (-not (Test-Path $ScriptPath)) {
-    Write-Error "Cannot find voice-shutdown.ps1 next to this installer."
-    exit 1
+foreach ($f in $Required) {
+    if (-not (Test-Path (Join-Path $Here $f))) {
+        Write-Error "Missing '$f' next to this installer ($Here)."
+        exit 1
+    }
 }
-if (-not (Test-Path $VbsPath)) {
-    Write-Error "Cannot find run-hidden.vbs next to this installer."
-    exit 1
+
+# Copy into the stable install folder unless we are already running from it.
+if ((Resolve-Path $Here).Path.TrimEnd('\') -ne $InstallDir.TrimEnd('\')) {
+    New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
+    foreach ($f in @("voice-shutdown.ps1", "run-hidden.vbs", "uninstall-startup.ps1", "README.md")) {
+        $src = Join-Path $Here $f
+        if (Test-Path $src) { Copy-Item $src -Destination $InstallDir -Force }
+    }
+    Write-Host "Copied files to $InstallDir"
 }
+
+$VbsPath = Join-Path $InstallDir "run-hidden.vbs"
 
 # Launch through wscript + the .vbs so NO console window (not even a flash)
 # appears at logon. wscript starts the PowerShell process fully hidden.
@@ -40,8 +57,10 @@ $principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interac
 
 Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Settings $settings -Principal $principal -Force | Out-Null
 
-Write-Host "Installed scheduled task '$TaskName'."
+Write-Host "Installed scheduled task '$TaskName' -> $InstallDir"
 Write-Host "It will listen for '$Keyword' automatically at every logon."
-Write-Host "Starting it now..."
-Start-ScheduledTask -TaskName $TaskName
-Write-Host "Done. To remove: run uninstall-startup.ps1"
+if (-not $NoStart) {
+    Start-ScheduledTask -TaskName $TaskName
+    Write-Host "Started now."
+}
+Write-Host "To remove: run uninstall-startup.ps1"
