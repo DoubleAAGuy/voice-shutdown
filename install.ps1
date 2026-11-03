@@ -61,9 +61,9 @@ try {
 $installer = Join-Path $InstallDir "install-startup.ps1"
 if (-not (Test-Path $installer)) { throw "Install incomplete: $installer is missing." }
 
-$args = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $installer,
+$psArgs = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $installer,
     "-Keyword", $Keyword, "-Confidence", $Confidence)
-if ($NoStart) { $args += "-NoStart" }
+if ($NoStart) { $psArgs += "-NoStart" }
 
-& powershell.exe @args
+& powershell.exe @psArgs
 exit $LASTEXITCODE
